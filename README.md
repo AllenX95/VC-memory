@@ -1,5 +1,7 @@
 # VC-memory — investment judgement memory for DeepSeek Harness
 
+> Source: https://github.com/AllenX95/VC-memory
+
 `@local/vc-memory` (投资记忆) keeps a VC investor's project and industry judgements as plain Markdown in one vault folder. Projects are one decision record each (verdict, assumptions, risks, review log); industries are **two-level view boards** — a theme board `行业/<theme>/_主题.md` (scope, cross-sector views, index) plus one file per sub-sector holding atomic, revisable views shown as "timestamp + current conclusion". A sidebar panel browses and edits them, one agent tool lets the assistant recall and update them in conversation, and the plugin writes periodic digests and an append-only change log. No database, no plugin-run service. Full Chinese guide: [README.zh.md](README.zh.md).
 
 > **Implementation status (2026-10-18):** project entries, the industry two-level view boards (theme board + sub-sector boards + view actions), digests and the change log are implemented; restart Harness to activate. Legacy flat industry files remain readable and are shown read-only under "旧格式行业条目（待迁移）".
