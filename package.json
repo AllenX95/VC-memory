@@ -1,0 +1,34 @@
+{
+  "name": "@local/vc-memory",
+  "version": "1.1.0",
+  "private": true,
+  "description": "VC investment memory for DeepSeek Harness: a lightweight Markdown vault for project and industry judgements, with review, digest, and cloud sync. 面向 VC 投资人的项目/行业判断记忆：Markdown 知识库 + 复盘 + 简报 + 云同步。",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "samples/*.md",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "docs/*.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

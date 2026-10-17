@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VC Memory">
+  <defs>
+    <linearGradient id="vcm-g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6bff"/>
+      <stop offset="1" stop-color="#7b3ff2"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="14" fill="url(#vcm-g)"/>
+  <path d="M18 43 V31 M26 43 V25 M34 43 V34 M42 43 V21" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.92"/>
+  <path d="M17 23 C24 17, 30 22, 36 17 C40 14, 44 15, 47 13" fill="none" stroke="#ffd166" stroke-width="3.2" stroke-linecap="round"/>
+  <circle cx="47" cy="13" r="3.6" fill="#ffd166"/>
+</svg>

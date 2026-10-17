@@ -1,0 +1,33 @@
+# vc-memory: VC investment judgement memory for one Harness profile.
+# The vault is plain Markdown on disk, so OneDrive / iCloud / Git can sync it
+# between machines without this plugin holding any database.
+- insert:
+    - id: vc-memory
+      name: '@local/vc-memory'
+      config:
+        # Empty = auto: <OneDrive>/VC-Memory when OneDrive exists, else
+        # ~/Documents/VC-Memory. Point it at a synced folder to share across
+        # devices; point several machines at the same OneDrive/Git folder.
+        vaultDir: ''
+        # Shown in UI copy; the vault itself stays language-neutral.
+        language: zh
+        # Default days between reviews for a new entry.
+        reviewCycleDays: 30
+        # off | daily | weekly | monthly — writes a Markdown digest into
+        # <vault>/简报 on the timer below (while the Harness runs).
+        autoDigest: weekly
+        # Weekly: ISO weekday, 1 = Monday … 7 = Sunday.
+        # Monthly: day of month, 1-28.
+        digestWeekday: 1
+        digestHour: 9
+        # Keep a short "investment memory" section in the model's system prompt
+        # (counts, due reviews, vault path, usage rules).
+        injectPrompt: true
+        # Sync: nothing to configure here.
+        #   default  -> the vault lives in <OneDrive>/VC-Memory (vaultDir empty)
+        #               and the OneDrive client syncs it between devices.
+        #   optional -> Git (GitHub/GitLab/self-hosted) is supported but is NOT
+        #               configured by default. To use it, add a `git:` block to
+        #               the vc-memory row in your profile patch layer:
+        #                 git: { enabled: true, autoCommit: true, autoPush: true }
+        #               See README.zh.md「多设备同步」for the full workflow.
