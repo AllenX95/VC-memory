@@ -37,8 +37,13 @@ window.__ModuleLoader__.load({
 .vc-root{position:relative;display:flex;flex:1 1 auto;flex-direction:column;height:100%;min-height:0;box-sizing:border-box;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font:13px/1.5 Inter,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;overflow:hidden}
 html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,0px)}
 .vc-root *{box-sizing:border-box}
-.vc-root button,.vc-root input,.vc-root select,.vc-root textarea{font-family:inherit;font-size:inherit;color:inherit}
-.vc-root button{cursor:pointer}
+/* :where() keeps this form-control reset at zero added specificity. A plain
+   .vc-root button selector is (0,1,1) and would beat every variant class
+   (.vc-btn, .vc-btn-primary, .vc-tab, .vc-search, ...) regardless of source
+   order, forcing color/font-size back to inheritance — that is what turned
+   primary buttons into black-on-black rectangles. */
+.vc-root :where(button,input,select,textarea){font-family:inherit;font-size:inherit;color:inherit}
+.vc-root :where(button){cursor:pointer}
 .vc-root :focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}
 .vc-head{flex:none;display:flex;flex-direction:column;gap:7px;padding:13px 18px 10px;border-bottom:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1)}
 .vc-head-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
@@ -58,8 +63,8 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
 .vc-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:28px;padding:0 11px;border-radius:7px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:12px;font-weight:500;line-height:1;white-space:nowrap;transition:background .12s ease,border-color .12s ease,opacity .12s ease}
 .vc-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);border-color:var(--dsw-alias-border-l3)}
 .vc-btn:disabled{opacity:.55;cursor:default}
-.vc-btn-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));border-color:transparent;color:var(--dsw-alias-bg-base)}
-.vc-btn-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));border-color:transparent;opacity:.9}
+.vc-btn-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));border-color:transparent;color:var(--dsw-alias-label-primary-foreground,var(--dsw-alias-bg-base))}
+.vc-btn-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));border-color:transparent;opacity:.9}
 .vc-btn-ghost{background:transparent;border-color:transparent;color:var(--dsw-alias-label-secondary)}
 .vc-btn-ghost:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);border-color:transparent;color:var(--dsw-alias-label-primary)}
 .vc-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--dsw-alias-bg-layer-3);color:var(--dsw-alias-label-secondary);font-size:10px;font-weight:600}
@@ -256,7 +261,7 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
 .vc-seg{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-2);align-self:flex-start;flex-wrap:wrap}
 .vc-seg-btn{height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:500}
 .vc-seg-btn:hover{color:var(--dsw-alias-label-primary)}
-.vc-seg-btn.on{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));color:var(--dsw-alias-bg-base)}
+.vc-seg-btn.on{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-brand-primary));color:var(--dsw-alias-label-primary-foreground,var(--dsw-alias-bg-base))}
 .vc-setting-block{display:flex;flex-direction:column;gap:5px;min-width:0}
 .vc-setting-label{font-size:11.5px;color:var(--dsw-alias-label-secondary)}
 .vc-path{display:block;padding:6px 8px;border-radius:6px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);font:11.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace;word-break:break-all}
