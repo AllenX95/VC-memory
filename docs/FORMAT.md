@@ -288,6 +288,14 @@ Actions: project `新建 / 更新 / 复盘 / 简报 / 同步 / 示例`; industry
 `新建观点 / 修正观点 / 削弱观点 / 证伪观点`. The log is the **event-level** trail and the only
 place for old→new view wording; `简报` is the **periodic summary**. Truncating the log is safe.
 
+## 设置与位置 (settings and location)
+
+The plugin's own user setting (the chosen vault location) lives outside the vault at
+`<DSH_HOME>/vc-memory/settings.json`. It is configuration, not memory; `恢复默认` removes it and
+falls back to the profile patch / OneDrive default. Switching the vault never moves or deletes the
+old folder. Theme (跟随系统 / 亮色 / 暗色) is the Harness-wide appearance preference, changed from
+the panel settings modal through the host theme service.
+
 ## Compatibility promises
 
 * Hand edits are safe: the plugin reparses each file on scan. Project entries keep unknown

@@ -25,10 +25,10 @@
 //     conflict costs a section, never the whole entry.
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { appendFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { execFile } from 'node:child_process'
 import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const name = 'vc-memory'
@@ -240,6 +240,24 @@ function isUnderOneDrive(dir) {
   return !!od && resolve(dir).toLowerCase().startsWith(resolve(od).toLowerCase())
 }
 
+// User-chosen vault location, persisted outside the vault so it survives a
+// move. The profile patch/config stays the fallback source of truth.
+function userSettingsFile() {
+  const home = process.env.DSH_HOME || join(homedir(), '.dsh')
+  return join(home, 'vc-memory', 'settings.json')
+}
+function readUserSettings() {
+  try {
+    const data = JSON.parse(readFileSync(userSettingsFile(), 'utf8'))
+    return data && typeof data.vaultDir === 'string' && data.vaultDir.trim() ? data : {}
+  } catch { return {} }
+}
+async function writeUserSettings(data) {
+  const file = userSettingsFile()
+  await mkdir(dirname(file), { recursive: true })
+  await writeFile(file, JSON.stringify(data, null, 2) + '\n', 'utf8')
+}
+
 const VAULT_README = `# VC 投资记忆（vc-memory）
 
 这个文件夹由 DeepSeek Harness 的 \`vc-memory\` 插件维护。项目判断是决策记录，行业判断是「主题板 + 细分赛道观点板」；
@@ -281,6 +299,23 @@ async function ensureVault(cfg) {
   if (!existsSync(log)) await writeFile(log, LOG_HEADER, 'utf8')
 }
 
+/** Switch the live vault directory (UI choice). Rolls back on failure. */
+async function switchVault(state, dir) {
+  const previous = state.cfg.vaultDir
+  state.cfg.vaultDir = resolve(String(dir))
+  state.problems = []
+  try {
+    await ensureVault(state.cfg)
+    await refresh(state)
+    state.vault = { ...(state.vault || {}), ...vaultInfo(state) }
+  } catch (e) {
+    state.cfg.vaultDir = previous
+    try { await refresh(state) } catch { /* keep old cache */ }
+    state.vault = { ...(state.vault || {}), ...vaultInfo(state) }
+    throw e
+  }
+}
+
 /** Append one human-readable line to <vault>/日志.md. Logging never fails a write. */
 async function appendLog(state, action, id, summary) {
   try {
@@ -291,8 +326,7 @@ async function appendLog(state, action, id, summary) {
   }
 }
 
-/** Last N log lines (header excluded), for /state and the panel. */
-function readLogLines(cfg, limit = 20) {
+/** Last N log lines (header excluded), for /state and the panel. */function readLogLines(cfg, limit = 20) {
   try {
     const text = readFileSync(join(cfg.vaultDir, LOG_FILE), 'utf8')
     return text.split('\n').filter((line) => line.startsWith('- ')).slice(-limit)
@@ -1757,6 +1791,7 @@ function statePayload(state) {
       digestHour: state.cfg.digestHour,
       injectPrompt: state.cfg.injectPrompt,
       git: { ...git },
+      settingsPath: state.settingsPath,
     },
     counts,
     entries,
@@ -1784,9 +1819,12 @@ function logInfo(state, message) {
 }
 
 export async function apply(ctx, rawConfig) {
-  const cfg = effectiveConfig(rawConfig)
+  const baseRaw = rawConfig && typeof rawConfig === 'object' ? rawConfig : {}
+  const userSettings = readUserSettings()
+  const cfg = effectiveConfig(userSettings.vaultDir ? { ...baseRaw, vaultDir: userSettings.vaultDir } : baseRaw)
   const state = {
     ctx, cfg, writable: true, entries: [], reviews: [], digests: [], themes: [], legacyIndustry: [], warnings: [], problems: [],
+    rawConfig: baseRaw, settingsPath: userSettingsFile(),
     gitInfo: null, lastSync: null, lastDigest: null, refreshing: null, vault: null,
     async init() {
       try {
@@ -1858,6 +1896,14 @@ export async function apply(ctx, rawConfig) {
       state.vault = { ...state.vault, ...vaultInfo(state) }
 
       if (method === 'GET' && path === '/state') return sendJson(res, 200, statePayload(state))
+      if (method === 'GET' && path === '/config') {
+        return sendJson(res, 200, {
+          ok: true,
+          vaultDir: state.cfg.vaultDir,
+          defaultDir: effectiveConfig(state.rawConfig).vaultDir,
+          settingsPath: state.settingsPath,
+        })
+      }
       if (method === 'GET' && path === '/entry') {
         const id = url.searchParams.get('id') || ''
         const parts = idParts(id)
@@ -1888,6 +1934,19 @@ export async function apply(ctx, rawConfig) {
       }
       if (method !== 'POST') return sendJson(res, 405, { ok: false, error: 'method not allowed' })
       const body = await readJsonBody(req)
+      if (path === '/config') {
+        if (body?.reset === true) {
+          await rm(state.settingsPath, { force: true })
+          const fallback = effectiveConfig(state.rawConfig).vaultDir
+          await switchVault(state, fallback)
+          return sendJson(res, 200, { ok: true, vaultDir: state.cfg.vaultDir, reset: true })
+        }
+        const target = String(body?.vaultDir || '').trim()
+        if (!target || !isAbsolute(target)) return sendJson(res, 400, { ok: false, error: '请提供绝对路径' })
+        await switchVault(state, target)
+        await writeUserSettings({ vaultDir: state.cfg.vaultDir })
+        return sendJson(res, 200, { ok: true, vaultDir: state.cfg.vaultDir, settingsPath: state.settingsPath })
+      }
       if (path === '/upsert') {
         if (body?.type === 'industry') return sendJson(res, 400, { ok: false, error: '行业请使用 /sector 建板、/view 添加/修正观点' })
         const result = await upsertEntry(state, body)

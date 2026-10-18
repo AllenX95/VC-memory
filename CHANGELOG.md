@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-18 (v1.1.1)
+
+- **面板设置**：新增「⚙ 设置」弹窗。外观（全局）：跟随系统 / 亮色 / 暗色，调用 Harness theme 服务；知识库位置：显示当前/默认路径，可通过系统目录选择或手动输入绝对路径，支持「恢复默认」。
+- **Host 配置**：新增 `GET/POST /vc-memory/api/config`；选择持久化到 `<DSH_HOME>/vc-memory/settings.json`，`reset` 回到补丁层/默认位置；切换只改指向，不移动/删除旧文件。
+- **修复**：主按钮黑底黑字——`.vc-btn-primary` 使用 `color: var(--dsw-alias-bg-base)` 并给 primary fill 加 fallback，浅色/暗色下文字可见。
+- **验证**：`client.js` 语法与桩测试（主题读写/订阅、目录选择、保存/恢复、页面回归）；`vc-memory-configcheck.mjs` 覆盖配置切换与持久化。
+
+## 2026-10-18 (v1.1.0)
+
 - **实现：行业两级结构**：Host 支持扫描 `行业/<主题>/_主题.md` + 细分赛道观点板、创建主题/赛道（`theme`/`sector` 工具动作与 `/theme`、`/sector` HTTP）、观点 add/revise/weaken/falsify/archive（`view` 动作与 `/view`）、主题索引自动重建、旧扁平行业条目只读兼容；日志记录结构/观点动作；简报按主题分组行业变化并给出拆分/合并提议。`upsert` 改为仅项目。
 - **实现：面板行业树**：行业 tab 改为「主题 → 细分赛道 → 观点」树；主题/赛道/观点详情；新建主题、新建赛道、新建/修正/削弱/证伪/归档观点；旧格式条目只读分组。项目相关流程保持不变。
 - **测试**：Host 自测扩展到主题/赛道创建、观点增改、日志、`/state` themes、`/industry`、HTTP 创建接口与旧格式拒绝；`client.js` 语法与桩渲染通过。

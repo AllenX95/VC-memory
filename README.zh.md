@@ -32,6 +32,7 @@
 
 1. **默认（`vaultDir` 为空）**：系统里有 OneDrive 时用 `<OneDrive>\VC-Memory`，否则用 `<用户目录>\Documents\VC-Memory`；本机形如 `C:\Users\<你>\OneDrive\VC-Memory`。
 2. **自定义**：把 `vaultDir` 写成某个同步文件夹的绝对路径，多台设备指向同一个逻辑目录即可。
+3. **面板里改**：点右上角「设置」→「知识库位置」，可直接选择/输入绝对路径并保存（无需改 profile）；「恢复默认」会回到自动解析的位置。切换只改变插件指向，不移动、不删除旧文件。
 
 目录结构：
 
@@ -69,6 +70,7 @@ VC-Memory/
 | 复盘 | 填结论、进展、偏差、更新判断、置信度、下次复盘日期，追加到复盘记录 |
 | 本周简报 | 生成并保存当期的周报（`简报/` 下）：项目变化 + 按主题分组的行业观点变化 |
 | 同步 | 查看/执行 Git 同步；未启用 Git 时显示当前云盘同步状态 |
+| 设置 | 「外观（全局）」：跟随系统 / 亮色 / 暗色；「知识库位置」：选择/输入绝对路径、保存或恢复默认 |
 | 刷新 | 立即重新扫描 vault |
 | 空库 | 显示 vault 路径和「写入示例记录」按钮，把 `samples/` 的示例写进空库 |
 
@@ -173,7 +175,7 @@ git push -u origin main
 
 | 键 | 默认值 | 说明 |
 | --- | --- | --- |
-| `vaultDir` | `''`（自动） | vault 目录；空串按 OneDrive → Documents 顺序解析 |
+| `vaultDir` | `''`（自动） | vault 目录；空串按 OneDrive → Documents 顺序解析；也可在面板「设置」里覆盖 |
 | `language` | `zh` | 界面文案语言偏好（库内容本身与语言无关） |
 | `reviewCycleDays` | `30` | 新条目默认复盘周期（天） |
 | `autoDigest` | `weekly` | `off` / `daily` / `weekly` / `monthly` |
@@ -209,7 +211,7 @@ git push -u origin main
 ## 常见问题
 
 **打开面板显示 vault 不存在 / 列表是空的？**
-先看面板顶部显示的实际 vault 路径。默认路径取决于 OneDrive 是否存在；自己设了 `vaultDir` 时确认目录存在且可写。首次打开会自动创建目录，空库用「写入示例记录」填充。
+先看面板顶部显示的实际 vault 路径。默认路径取决于 OneDrive 是否存在；自己设了 `vaultDir` 时确认目录存在且可写。也可以在面板「设置 → 知识库位置」里直接选择/输入路径并保存；首次打开会自动创建目录，空库用「写入示例记录」填充。
 
 **同步提示 git 不可用？**
 安装 Git（Windows 装 Git for Windows）并确保 `git` 在 PATH 里，然后重启 Harness；也可以在面板「同步」里查看具体输出。没有 Git 不影响使用，把 `git.enabled` 保持 `false`、用 OneDrive 同步即可。

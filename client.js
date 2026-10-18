@@ -58,8 +58,8 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
 .vc-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:28px;padding:0 11px;border-radius:7px;border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:12px;font-weight:500;line-height:1;white-space:nowrap;transition:background .12s ease,border-color .12s ease,opacity .12s ease}
 .vc-btn:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);border-color:var(--dsw-alias-border-l3)}
 .vc-btn:disabled{opacity:.55;cursor:default}
-.vc-btn-primary{background:var(--dsw-alias-button-primary-fill);border-color:transparent;color:var(--dsw-alias-label-primary-foreground)}
-.vc-btn-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-fill);border-color:transparent;opacity:.9}
+.vc-btn-primary{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));border-color:transparent;color:var(--dsw-alias-bg-base)}
+.vc-btn-primary:hover:not(:disabled){background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));border-color:transparent;opacity:.9}
 .vc-btn-ghost{background:transparent;border-color:transparent;color:var(--dsw-alias-label-secondary)}
 .vc-btn-ghost:hover:not(:disabled){background:var(--dsw-alias-bg-layer-2);border-color:transparent;color:var(--dsw-alias-label-primary)}
 .vc-count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--dsw-alias-bg-layer-3);color:var(--dsw-alias-label-secondary);font-size:10px;font-weight:600}
@@ -248,12 +248,28 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
 .vc-archived-list{display:flex;flex-direction:column;gap:4px;margin:4px 0 0;padding-left:16px;color:var(--dsw-alias-label-tertiary);font-size:11.5px}
 .vc-archived-list li{word-break:break-word}
 .vc-pill-warn{color:var(--dsw-alias-state-warn-primary);background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent)}
+.vc-settings-section{display:flex;flex-direction:column;gap:8px;padding:14px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
+.vc-settings-section:first-child{padding-top:2px}
+.vc-settings-section:last-child{padding-bottom:0;border-bottom:0}
+.vc-settings-title{font-size:12.5px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.vc-settings-hint{font-size:11.5px;line-height:1.6;color:var(--dsw-alias-label-tertiary);word-break:break-word}
+.vc-seg{display:inline-flex;align-items:center;gap:2px;padding:2px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;background:var(--dsw-alias-bg-layer-2);align-self:flex-start;flex-wrap:wrap}
+.vc-seg-btn{height:26px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:500}
+.vc-seg-btn:hover{color:var(--dsw-alias-label-primary)}
+.vc-seg-btn.on{background:var(--dsw-alias-button-primary-fill,var(--dsw-alias-label-primary));color:var(--dsw-alias-bg-base)}
+.vc-setting-block{display:flex;flex-direction:column;gap:5px;min-width:0}
+.vc-setting-label{font-size:11.5px;color:var(--dsw-alias-label-secondary)}
+.vc-path{display:block;padding:6px 8px;border-radius:6px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);font:11.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace;word-break:break-all}
+.vc-path-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.vc-path-row .vc-input{flex:1 1 220px;min-width:180px}
+.vc-settings-warn{padding:7px 10px;border:1px solid var(--dsw-alias-state-warn-tertiary);border-radius:8px;background:var(--dsw-alias-state-warn-tertiary);color:var(--dsw-alias-label-primary);font-size:11.5px;line-height:1.6}
+.vc-settings-meta{display:flex;flex-direction:column;gap:3px;color:var(--dsw-alias-label-tertiary);font-size:11px;word-break:break-all}
 .vc-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 @media (max-width:760px){.vc-list{width:250px}.vc-empty-card{grid-template-columns:1fr}.vc-grid2{grid-template-columns:1fr}.vc-search{width:130px}}
 `
 
     // ── module shape ──────────────────────────────────────────────────────────
-    module.exports.inject = ['slots', 'locale']
+    module.exports.inject = ['slots', 'locale', 'theme', 'uiWorkspace']
 
     module.exports.apply = (ctx) => {
       if (React === null || typeof React.createElement !== 'function') {
@@ -700,7 +716,12 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
         // ok:false plus the fix-it instructions in output, so this one call
         // passes allowNotOk and lets the UI show that guidance.
         sync: function () { return request('/sync', {}, { allowNotOk: true }) },
-        seed: function () { return request('/seed', {}) }
+        seed: function () { return request('/seed', {}) },
+        // vault location: GET /config returns the effective + default dirs; the
+        // POST switches the live vault and persists the choice outside the vault.
+        config: function () { return request('/config') },
+        setVault: function (vaultDir) { return request('/config', { vaultDir: str(vaultDir) }) },
+        resetVault: function () { return request('/config', { reset: true }) }
       }
 
       // ── shared components ───────────────────────────────────────────────────
@@ -1210,7 +1231,7 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
                 h('li', null, vault.exists === false ? '目录还不存在：写入第一条记录时会自动创建。' : '所有内容都是普通 Markdown，可被 Obsidian、Typora、VS Code 直接编辑。'),
                 h('li', null, '项目放在 项目/，行业按「主题 → 细分赛道 → 观点」放在 行业/，周报写在 简报/。'),
                 h('li', null, '行业记忆在「行业」标签页：先建主题，再建细分赛道，再记录可修正的观点。'),
-                h('li', null, '想改目录：在 profile 的补丁层设置 vaultDir。'))),
+                h('li', null, '想改目录：点右上角「设置」选择知识库位置。'))),
             h('div', { className: 'vc-empty-block' },
               h('div', { className: 'vc-empty-label' }, '同步方式'),
               h('ul', { className: 'vc-empty-list' },
@@ -1903,6 +1924,225 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
               h(Btn, { type: 'submit', variant: 'primary', disabled: saving }, saving ? '处理中…' : title))))
       }
 
+      // ── settings: global appearance + vault location ────────────────────────
+      function SettingsModal(props) {
+        const themeApi = ctx && ctx.theme && typeof ctx.theme.getTheme === 'function' && typeof ctx.theme.setTheme === 'function'
+          ? ctx.theme
+          : null
+        const workspaceApi = ctx && ctx.uiWorkspace && typeof ctx.uiWorkspace.pickDirectory === 'function'
+          ? ctx.uiWorkspace
+          : null
+        const currentFromState = str(props.state && props.state.config && props.state.config.vaultDir)
+          || str(props.state && props.state.vault && props.state.vault.dir)
+
+        const readThemePreference = function () {
+          if (themeApi === null) return 'system'
+          try {
+            const snapshot = themeApi.getTheme()
+            const preference = str(snapshot && snapshot.preference)
+            if (preference === 'light' || preference === 'dark' || preference === 'system') return preference
+            const scheme = str(snapshot && snapshot.active && snapshot.active.colorScheme)
+            if (scheme === 'light' || scheme === 'dark') return scheme
+          } catch (error) {
+            console.warn('[vc-memory] could not read the theme preference:', error)
+          }
+          return 'system'
+        }
+
+        const [preference, setPreference] = React.useState(readThemePreference)
+
+        React.useEffect(function () {
+          if (themeApi === null) return undefined
+          setPreference(readThemePreference())
+          if (!ctx || typeof ctx.on !== 'function') return undefined
+          let dispose = null
+          try {
+            dispose = ctx.on('theme/change', function (snapshot) {
+              const next = str(snapshot && snapshot.preference)
+              if (next === 'light' || next === 'dark' || next === 'system') setPreference(next)
+              else setPreference(readThemePreference())
+            })
+          } catch (error) {
+            console.warn('[vc-memory] theme subscription failed:', error)
+          }
+          return function () {
+            if (typeof dispose === 'function') {
+              try { dispose() } catch (error) { /* already disposed */ }
+            }
+          }
+        }, [])
+
+        const choosePreference = function (id) {
+          if (themeApi === null) return
+          try {
+            themeApi.setTheme(id)
+            setPreference(id)
+          } catch (error) {
+            if (typeof props.onToast === 'function') props.onToast('error', '切换外观失败：' + (str(error && error.message) || '未知错误'))
+          }
+        }
+
+        const [remoteConfig, setRemoteConfig] = React.useState(null)
+        const [configLoading, setConfigLoading] = React.useState(true)
+        const [configError, setConfigError] = React.useState(null)
+        const [currentDir, setCurrentDir] = React.useState(currentFromState)
+        const [vaultInput, setVaultInput] = React.useState(currentFromState)
+        const [picking, setPicking] = React.useState(false)
+        const [savingVault, setSavingVault] = React.useState(false)
+        const [resettingVault, setResettingVault] = React.useState(false)
+        const [actionError, setActionError] = React.useState(null)
+        const editedVaultRef = React.useRef(false)
+
+        React.useEffect(function () {
+          let alive = true
+          api.config().then(function (payload) {
+            if (alive !== true) return
+            setRemoteConfig(payload)
+            setConfigLoading(false)
+            setConfigError(null)
+            const dir = str(payload && payload.vaultDir)
+            if (dir !== '') {
+              setCurrentDir(dir)
+              if (editedVaultRef.current !== true) setVaultInput(dir)
+            }
+          }).catch(function (failure) {
+            if (alive !== true) return
+            setConfigLoading(false)
+            setConfigError(str(failure && failure.message) || '读取失败')
+          })
+          return function () { alive = false }
+        }, [])
+
+        const applyVaultResult = function (result, fallbackDir, message) {
+          const dir = str(result && result.vaultDir) || fallbackDir || ''
+          setCurrentDir(dir)
+          setVaultInput(dir)
+          editedVaultRef.current = false
+          const settingsPath = str(result && result.settingsPath)
+          if (settingsPath !== '') {
+            setRemoteConfig(function (previous) { return Object.assign({}, previous || {}, { settingsPath: settingsPath }) })
+          }
+          if (typeof props.onVaultChanged === 'function') props.onVaultChanged(result, message)
+        }
+
+        const pickFolder = async function () {
+          if (workspaceApi === null) {
+            if (typeof props.onToast === 'function') props.onToast('error', '当前环境没有文件夹选择器，请直接填写绝对路径。')
+            return
+          }
+          setPicking(true)
+          setActionError(null)
+          try {
+            const picked = await workspaceApi.pickDirectory()
+            if (typeof picked === 'string' && picked.trim() !== '') {
+              editedVaultRef.current = true
+              setVaultInput(picked.trim())
+            }
+          } catch (failure) {
+            if (typeof props.onToast === 'function') props.onToast('error', '选择文件夹失败：' + (str(failure && failure.message) || '未知错误'))
+          } finally {
+            setPicking(false)
+          }
+        }
+
+        const saveVault = async function (event) {
+          if (event && typeof event.preventDefault === 'function') event.preventDefault()
+          if (savingVault || resettingVault) return
+          const target = vaultInput.trim()
+          if (target === '') { setActionError('请填写知识库的绝对路径。'); return }
+          setSavingVault(true)
+          setActionError(null)
+          try {
+            const result = await api.setVault(target)
+            setSavingVault(false)
+            applyVaultResult(result, target, '知识库位置已更新：' + (str(result && result.vaultDir) || target))
+          } catch (failure) {
+            setSavingVault(false)
+            setActionError(str(failure && failure.message) || '保存知识库位置失败')
+          }
+        }
+
+        const resetVault = async function () {
+          if (savingVault || resettingVault) return
+          setResettingVault(true)
+          setActionError(null)
+          try {
+            const result = await api.resetVault()
+            setResettingVault(false)
+            const dir = str(result && result.vaultDir) || str(remoteConfig && remoteConfig.defaultDir)
+            applyVaultResult(result, dir, '已恢复默认知识库位置：' + dir)
+          } catch (failure) {
+            setResettingVault(false)
+            setActionError(str(failure && failure.message) || '恢复默认位置失败')
+          }
+        }
+
+        const busy = savingVault || resettingVault
+        const themeSection = themeApi === null ? null : h('div', { className: 'vc-settings-section' },
+          h('div', { className: 'vc-settings-title' }, '外观（全局）'),
+          h('div', { className: 'vc-settings-hint' }, '外观是 Harness 的全局偏好，切换后整个应用一起变化。'),
+          h('div', { className: 'vc-seg', role: 'group', 'aria-label': '外观' },
+            [['system', '跟随系统'], ['light', '亮色'], ['dark', '暗色']].map(function (item) {
+              const on = preference === item[0]
+              return h('button', {
+                key: item[0],
+                type: 'button',
+                className: 'vc-seg-btn' + (on ? ' on' : ''),
+                'aria-pressed': on ? 'true' : 'false',
+                onClick: function () { choosePreference(item[0]) }
+              }, item[1])
+            })))
+
+        const remoteDefault = str(remoteConfig && remoteConfig.defaultDir)
+        const settingsPath = str(remoteConfig && remoteConfig.settingsPath)
+        const vaultSection = h('div', { className: 'vc-settings-section' },
+          h('div', { className: 'vc-settings-title' }, '知识库位置'),
+          h('div', { className: 'vc-settings-hint' }, '面板、vc_memory 工具、简报与云同步都指向这个目录；把它放在 OneDrive / Git 同步的文件夹里即可多设备共用。'),
+          h('div', { className: 'vc-setting-block' },
+            h('div', { className: 'vc-setting-label' }, '当前目录'),
+            h('code', { className: 'vc-path' }, currentDir !== '' ? currentDir : '（尚未确定，由 Host 自动选择）')),
+          configLoading ? h('div', { className: 'vc-hint' }, '正在读取目录配置…') : null,
+          configError !== null ? h('div', { className: 'vc-form-error', role: 'alert' }, '读取目录配置失败：' + configError) : null,
+          remoteDefault !== '' || settingsPath !== ''
+            ? h('div', { className: 'vc-settings-meta' },
+              remoteDefault !== '' ? h('span', null, '默认位置：' + remoteDefault) : null,
+              settingsPath !== '' ? h('span', null, '覆盖配置：' + settingsPath) : null)
+            : null,
+          h('div', { className: 'vc-setting-block' },
+            h('div', { className: 'vc-setting-label' }, '绝对路径'),
+            h('div', { className: 'vc-path-row' },
+              h('input', {
+                className: 'vc-input',
+                type: 'text',
+                value: vaultInput,
+                placeholder: '例如 C:/Users/you/OneDrive/VC-Memory',
+                'aria-label': '知识库绝对路径',
+                onChange: function (event) {
+                  editedVaultRef.current = true
+                  setVaultInput(event.target.value)
+                  setActionError(null)
+                }
+              }),
+              h(Btn, {
+                onClick: function () { void pickFolder() },
+                disabled: picking || busy,
+                title: workspaceApi === null ? '当前环境没有文件夹选择器，请手动填写路径' : '打开文件夹选择器'
+              }, picking ? '选择中…' : '选择文件夹…'))),
+          h('div', { className: 'vc-path-row' },
+            h(Btn, { type: 'submit', variant: 'primary', disabled: busy }, savingVault ? '保存中…' : '保存位置'),
+            h(Btn, { onClick: function () { void resetVault() }, disabled: busy }, resettingVault ? '恢复中…' : '恢复默认')),
+          h('div', { className: 'vc-settings-warn' }, '切换位置只改变插件指向的目录，不会移动或删除旧文件；旧知识库仍留在原磁盘位置。'),
+          workspaceApi === null ? h('div', { className: 'vc-settings-hint' }, '当前环境没有文件夹选择器，请直接填写绝对路径。') : null)
+
+        return h(ModalFrame, { title: '设置', subtitle: '外观与知识库位置；保存后立即生效。', wide: true, onClose: props.onClose },
+          h('form', { className: 'vc-form', onSubmit: saveVault },
+            h('div', { className: 'vc-form-scroll' }, themeSection, vaultSection),
+            actionError !== null ? h('div', { className: 'vc-form-error', role: 'alert' }, actionError) : null,
+            h('div', { className: 'vc-form-foot' },
+              h('span', { className: 'vc-foot-hint' }, 'Esc 关闭'),
+              h(Btn, { onClick: props.onClose }, '关闭'))))
+      }
+
       // ── the page ────────────────────────────────────────────────────────────
       function Panel() {
         const [state, setState] = React.useState(null)
@@ -2362,6 +2602,19 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
           if (op === 'archive') selectBoardTarget(target)
         }
 
+        // A vault switch changes every id underneath the panel: drop the old
+        // industry selection, rescan /state (which re-picks a project) and force
+        // the open entry to reload from the new directory.
+        const handleVaultChanged = async function (result, message) {
+          const dir = str(result && result.vaultDir)
+          showToast('success', message || ('知识库位置已更新：' + (dir || '')))
+          setIndustrySel(null)
+          setExpandedThemes({})
+          setExpandedSectors({})
+          await loadState({ silent: true })
+          setDetailTick(function (value) { return value + 1 })
+        }
+
         const doSync = async function () {
           if (busy !== null) return
           setBusy('sync')
@@ -2460,6 +2713,14 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
             onClose: closeModal,
             onSaved: handleViewReason
           }))
+        } else if (modal !== null && modal.kind === 'settings') {
+          modalEl = guard('settings-modal', h(SettingsModal, {
+            key: 'settings',
+            state,
+            onClose: closeModal,
+            onToast: showToast,
+            onVaultChanged: handleVaultChanged
+          }))
         }
 
         const titleText = (function () {
@@ -2514,7 +2775,8 @@ html[data-platform="darwin"] .vc-root{padding-top:var(--dsh-frame-top-clearance,
                 h(Btn, { variant: 'primary', onClick: function () { setModal({ kind: 'entry', mode: 'create' }) } }, '＋ 新建'),
                 h(Btn, { onClick: function () { setModal({ kind: 'digest' }) } }, '本周简报'),
                 h(Btn, { onClick: function () { void doSync() }, disabled: busy !== null, title: '按 Host 配置提交/推送 Git，或说明网盘同步状态' }, busy === 'sync' ? '同步中…' : '同步'),
-                h(Btn, { onClick: function () { void doRefresh() }, disabled: busy !== null, 'aria-label': '刷新投资记忆数据' }, busy === 'refresh' ? '刷新中…' : '刷新'))),
+                h(Btn, { onClick: function () { void doRefresh() }, disabled: busy !== null, 'aria-label': '刷新投资记忆数据' }, busy === 'refresh' ? '刷新中…' : '刷新'),
+                h(Btn, { variant: 'ghost', onClick: function () { setModal({ kind: 'settings' }) }, title: '外观与知识库位置', 'aria-label': '打开设置' }, '⚙ 设置'))),
             h('div', { className: 'vc-head-row' },
               h('div', { className: 'vc-sync', title: syncTitle },
                 h('span', { className: 'vc-sync-dot' + (syncBad ? ' warn' : '') }),

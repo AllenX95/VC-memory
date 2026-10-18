@@ -21,7 +21,7 @@ Install the bundle through the Harness plugin manager in this profile and enable
 
 ## Where the data lives
 
-With `vaultDir: ''` the vault is `<OneDrive>/VC-Memory` when OneDrive exists, else `~/Documents/VC-Memory` (e.g. `C:\Users\<you>\OneDrive\VC-Memory`).
+With `vaultDir: ''` the vault is `<OneDrive>/VC-Memory` when OneDrive exists, else `~/Documents/VC-Memory` (e.g. `C:\Users\<you>\OneDrive\VC-Memory`). You can also change it from the panel: **设置 → 知识库位置** (choose or type an absolute path, save; 恢复默认 goes back to the auto-resolved location). Switching only changes where the plugin points; old files are not moved or deleted.
 
 ```
 VC-Memory/
@@ -29,7 +29,7 @@ VC-Memory/
 ├── 日志.md                       # append-only change log (one line per write)
 ├── 项目/<slug>.md               # project decision record
 ├── 行业/<theme>/_主题.md        # theme board (scope + cross-sector views + index)
-├── 行业/<theme>/<sector>.md     # sub-sector view board (next format)
+├── 行业/<theme>/<sector>.md     # sub-sector view board
 └── 简报/2026-W42.md
 ```
 
@@ -37,7 +37,7 @@ A project entry's id is its vault-relative path without `.md` (e.g. `项目/xing
 
 ## Panel and tool
 
-Tabs 全部 / 项目 / 行业 / 到期, client-side search, detail pane, 新建/编辑, 复盘, digest preview/save, 同步, 刷新, and 写入示例记录 for an empty vault; overdue project reviews are highlighted and state refreshes on focus and every 30 s.
+Tabs 全部 / 项目 / 行业 / 到期, client-side search, detail pane, 新建/编辑, 复盘, digest preview/save, 同步, 刷新, 设置 (外观：跟随系统/亮色/暗色；知识库位置), and 写入示例记录 for an empty vault; overdue project reviews are highlighted and state refreshes on focus and every 30 s.
 
 > The industry theme/sub-sector tree, view actions and "new theme / new sub-sector" controls are implemented (restart Harness to activate). Structure creation is user-confirmed, except that an explicit "记一下这个行业" instruction lets the model create one theme + one sub-sector directly.
 
@@ -72,7 +72,7 @@ Pull before editing (the plugin does not merge); the 同步 button commits and, 
 Edit the `vc-memory` row in the profile's `cordis.patch.yml` (e.g. `~/.dsh/profiles/desktop/cordis.patch.yml`). This plugin registers no config form, so the patch layer is the source of truth. Defaults:
 
 ```yaml
-vaultDir: ''   # auto: <OneDrive>/VC-Memory, else ~/Documents/VC-Memory
+vaultDir: ''   # auto: <OneDrive>/VC-Memory, else ~/Documents/VC-Memory (panel 设置 can override)
 language: zh
 reviewCycleDays: 30
 autoDigest: weekly   # off | daily | weekly | monthly

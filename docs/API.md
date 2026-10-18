@@ -181,6 +181,23 @@ Creates `行业/<theme>/<sector>.md` with its first view and refreshes the theme
 The response carries the updated `view`, `boardId`, and (for archive) the archived record. Panels
 should refresh `/state` afterwards.
 
+## Vault location API
+
+### `GET /vc-memory/api/config`
+
+Returns `{ ok, vaultDir, defaultDir, settingsPath }`.
+
+### `POST /vc-memory/api/config`
+
+```jsonc
+{ "vaultDir": "C:/Users/<you>/OneDrive/VC-Memory" }   // absolute path
+{ "reset": true }                                       // back to patch/default location
+```
+
+Switches the live vault (creates the folder if needed, scans it) and persists the choice to
+`<DSH_HOME>/vc-memory/settings.json`. The OneDrive default / profile patch remains the fallback;
+`reset` removes the override. Existing vault files are never moved or deleted.
+
 ## `POST /vc-memory/api/upsert`
 
 Create or update one **project** entry (`/upsert` rejects `type: "industry"`; use `/sector` and
